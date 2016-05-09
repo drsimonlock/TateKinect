@@ -1,6 +1,6 @@
 float pov = PI;
 Zone[] zones;
-int xoffset, yoffset;
+int xoffset, yoffset, zoffset;
 int selected = 0;
 int increment = 10;
 int skip = 2;
@@ -8,6 +8,8 @@ KinectAbstractionLayer kinect;
 int baselinePixelCount;
 int currentPixelCount;
 boolean topDown = false;
+boolean walkForwards = false;
+boolean walkBackwards = false;
 
 void setup()
 {
@@ -16,9 +18,8 @@ void setup()
   sphereDetail(8);
   initOSC();
   kinect = new KinectAbstractionLayer(this);
-  xoffset = kinect.initialXoffset;
-  yoffset = kinect.initialYoffset;
-
+  resetView();
+  
   String[] lines = loadStrings("data.txt");
   zones = new Zone[lines.length];
   for (int i=0; i<lines.length; i++) {
@@ -31,11 +32,13 @@ void setup()
 void draw()
 {
   background(0);
-  strokeWeight(1);
+  strokeWeight(2);
   int[] depth = kinect.getRawDepth();
-  translate(xoffset, yoffset, 100);
+  translate(xoffset, yoffset, zoffset);
   if (topDown) kinect.topDownTranslate();
   rotateY(pov);
+  if(walkForwards) zoffset+=3;
+  if(walkBackwards) zoffset-=3;
   currentPixelCount = 0;
   for (int x=0; x<kinect.w; x+=skip) {
     for (int y=0; y<kinect.h; y+=skip) {
@@ -44,8 +47,7 @@ void draw()
         PVector position = kinect.calculateRealWorldPoint(x, y, rawDepth);
         if (position.z > 0) currentPixelCount++;
         translate(position.x, position.y, position.z);
-        stroke(position.z/3, 255, 255);
-        strokeWeight(2.0 + (position.z/2000.0));
+        stroke(position.z/2.8, 255, 255);
         point(0, 0);
         translate(-position.x, -position.y, -position.z);
         for (int i=0; i<zones.length; i++) {
@@ -62,10 +64,10 @@ void mouseDragged()
 {
   if ((pmouseX > 0) && (pmouseY > 0)) {
     if (keyPressed) {
+      pov -= (mouseX-pmouseX)/200.0;
+    } else {
       xoffset += mouseX-pmouseX;
       yoffset += mouseY-pmouseY;
-    } else {
-      pov += (mouseX-pmouseX)/100.0;
     }
   }
 }
@@ -73,6 +75,10 @@ void mouseDragged()
 void keyPressed()
 {
   if (key == 'l') learnEverything();
+  else if (key == 't') topDown = !topDown;
+  else if (key == 'a') walkForwards = true;
+  else if (key == 'z') walkBackwards = true;
+  else if (key == 'r') resetView();
   else if (keyCode == SHIFT) increment = 1;
   else if (keyCode == UP) {
     if (topDown) zones[selected].loc.z+=increment;
@@ -88,11 +94,6 @@ void keyPressed()
   } else if ((key == '=') || (key == '+')) {
     if (topDown) zones[selected].loc.y+=increment;
     else zones[selected].loc.z+=increment;
-  } else if (key == 't') topDown = !topDown;
-  else if (key == 'r') {
-    xoffset = kinect.initialXoffset;
-    yoffset = kinect.initialYoffset;
-    pov = PI;
   } else if (key == '\t') {
     zones[selected].selected = false;
     selected++;
@@ -102,9 +103,19 @@ void keyPressed()
   saveData();
 }
 
+void resetView()
+{
+  xoffset = kinect.initialXoffset;
+  yoffset = kinect.initialYoffset;
+  zoffset = kinect.initialZoffset;
+  pov = PI;
+}
+
 void keyReleased()
 {
   if (keyCode == SHIFT) increment = 10;
+  else if (key == 'a') walkForwards = false;
+  else if (key == 'z') walkBackwards = false;
 }
 
 void saveData()

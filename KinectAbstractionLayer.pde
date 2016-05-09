@@ -5,7 +5,7 @@ class KinectAbstractionLayer
 {
   Kinect kv1;
   Kinect2 kv2;
-  int w, h, initialXoffset, initialYoffset;
+  int w, h, initialXoffset, initialYoffset, initialZoffset;
 
   KinectAbstractionLayer(PApplet parent)
   {
@@ -16,14 +16,16 @@ class KinectAbstractionLayer
       h = 480;
       initialXoffset = 150;
       initialYoffset = 150;
+      initialZoffset = 100;
     } else {
       kv2 = new Kinect2(parent);
       kv2.initDepth();
       kv2.initDevice();
       w = 512;
       h = 424;
-      initialXoffset = 300;
-      initialYoffset = 250;
+      initialXoffset = 350;
+      initialYoffset = 350;
+      initialZoffset = 420;
     }
   }
 
@@ -47,7 +49,8 @@ class KinectAbstractionLayer
   void topDownTranslate()
   {
     rotateX(-HALF_PI);
-    if (kv2 != null) translate(100, 200, 500);
+    // Due to previous rotation, translation order is X Z Y
+    if (kv2 != null) translate(0, 600, 400);
     else translate(100, 1000, 550);
   }
 }
