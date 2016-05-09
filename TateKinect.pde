@@ -1,20 +1,10 @@
-import oscP5.*;
-import netP5.*;
-import java.net.*;
-import org.openkinect.freenect.*;
-import org.openkinect.processing.*;
-
 float pov = PI;
 Zone[] zones;
+int xoffset, yoffset;
 int selected = 0;
 int increment = 10;
 int skip = 2;
-int xoffset = 150;
-int yoffset = 150;
-OscP5 osc;
-NetAddress recipient;
 KinectAbstractionLayer kinect;
-String machineID;
 int baselinePixelCount;
 int currentPixelCount;
 boolean topDown = false;
@@ -24,10 +14,10 @@ void setup()
   size(800, 600, P3D);
   colorMode(HSB);
   sphereDetail(8);
-  osc = new OscP5(this, 8000);
-  machineID = getMachineID();
-  recipient = new NetAddress("127.0.0.1", 8888);
+  initOSC();
   kinect = new KinectAbstractionLayer(this);
+  xoffset = kinect.initialXoffset;
+  yoffset = kinect.initialYoffset;
 
   String[] lines = loadStrings("data.txt");
   zones = new Zone[lines.length];
@@ -44,10 +34,7 @@ void draw()
   strokeWeight(1);
   int[] depth = kinect.getRawDepth();
   translate(xoffset, yoffset, 100);
-  if (topDown) {
-    rotateX(-HALF_PI);
-    translate(100, 1000, 550);
-  }
+  if (topDown) kinect.topDownTranslate();
   rotateY(pov);
   currentPixelCount = 0;
   for (int x=0; x<kinect.w; x+=skip) {
@@ -103,8 +90,8 @@ void keyPressed()
     else zones[selected].loc.z+=increment;
   } else if (key == 't') topDown = !topDown;
   else if (key == 'r') {
-    xoffset = 150;
-    yoffset = 150;
+    xoffset = kinect.initialXoffset;
+    yoffset = kinect.initialYoffset;
     pov = PI;
   } else if (key == '\t') {
     zones[selected].selected = false;
@@ -133,27 +120,4 @@ void learnEverything()
 {
   for (int i=0; i<zones.length; i++) zones[i].learnToIgnoreCurrentPixels();
   baselinePixelCount = currentPixelCount;
-}
-
-String getMachineID()
-{
-  try {
-    NetworkInterface inter = NetworkInterface.getNetworkInterfaces().nextElement();
-    byte[] bytes = inter.getHardwareAddress();
-    String mac = "";
-    for (int i=0; i<bytes.length; i++) mac = mac + String.format("%02X:", bytes[i]);
-    mac = mac.substring(0, mac.length()-1);
-    mac = mac.toLowerCase();    
-    if (mac.endsWith("34:36:3b:78:19:5c")) return "S";
-    else if (mac.endsWith("AAA")) return "A";
-    else if (mac.endsWith("BBB")) return "B";
-    else if (mac.endsWith("CCC")) return "C";
-    else {
-      println(mac + " is an unknown machine");
-      return "X";
-    }
-  } 
-  catch (SocketException se) {
-    return "X";
-  }
 }
