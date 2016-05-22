@@ -2,7 +2,6 @@ class Zone
 {
   PVector loc;
   int triggerCount;
-  boolean selected = false;
   int size;
   String id;
   ArrayList<PVector> pointsToIgnore = new ArrayList();
@@ -51,8 +50,6 @@ class Zone
       noFill();
     }
     stroke(c);
-    if (selected) strokeWeight(3);
-    else strokeWeight(1);
     triggerCount = 0;
     translate(loc.x, loc.y, loc.z);
     sphere(size);

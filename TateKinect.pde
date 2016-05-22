@@ -1,5 +1,5 @@
 float pov = PI;
-Zone[] zones;
+Grid[] grids;
 int xoffset, yoffset, zoffset;
 int selected = 0;
 int increment = 10;
@@ -21,12 +21,12 @@ void setup()
   resetView();
   
   String[] lines = loadStrings("data.txt");
-  zones = new Zone[lines.length];
+  grids = new Grid[lines.length];
   for (int i=0; i<lines.length; i++) {
     String[] data = lines[i].split(" ");
-    zones[i] = new Zone(data[0], int(data[1]), int(data[2]), int(data[3]), int(data[4]));
+    grids[i] = new Grid(data[0], int(data[1]), int(data[2]), int(data[3]), int(data[4]), int(data[5]), int(data[6]));
   }
-  zones[selected].selected = true;
+  grids[selected].selected = true;
 }
 
 void draw()
@@ -50,13 +50,11 @@ void draw()
         stroke(position.z/2.8, 255, 255);
         point(0, 0);
         translate(-position.x, -position.y, -position.z);
-        for (int i=0; i<zones.length; i++) {
-          if (zones[i].contains(position)) zones[i].triggerCount++;
-        }
+        for (int i=0; i<grids.length; i++) grids[i].checkForTrigger(position);
       }
     }
   }
-  for (int i=0; i<zones.length; i++) zones[i].drawYourself();
+  for (int i=0; i<grids.length; i++) grids[i].drawYourself();
   if (frameCount % 50 == 0) sendSceneData((baselinePixelCount - currentPixelCount)/10);
 }
 
@@ -81,24 +79,24 @@ void keyPressed()
   else if (key == 'r') resetView();
   else if (keyCode == SHIFT) increment = 1;
   else if (keyCode == UP) {
-    if (topDown) zones[selected].loc.z+=increment;
-    else zones[selected].loc.y-=increment;
+    if (topDown) grids[selected].shiftZ(increment);
+    else grids[selected].shiftY(-increment);
   } else if (keyCode == DOWN) {
-    if (topDown) zones[selected].loc.z-=increment;
-    else  zones[selected].loc.y+=increment;
-  } else if (keyCode == LEFT) zones[selected].loc.x+=increment;
-  else if (keyCode == RIGHT) zones[selected].loc.x-=increment;
+    if (topDown) grids[selected].shiftZ(-increment);
+    else  grids[selected].shiftY(increment);
+  } else if (keyCode == LEFT) grids[selected].shiftX(increment);
+  else if (keyCode == RIGHT) grids[selected].shiftX(-increment);
   else if ((key == '-') || (key == '_')) {
-    if (topDown) zones[selected].loc.y-=increment;
-    else zones[selected].loc.z-=increment;
+    if (topDown) grids[selected].shiftY(-increment);
+    else grids[selected].shiftZ(-increment);
   } else if ((key == '=') || (key == '+')) {
-    if (topDown) zones[selected].loc.y+=increment;
-    else zones[selected].loc.z+=increment;
+    if (topDown) grids[selected].shiftY(increment);
+    else grids[selected].shiftZ(increment);
   } else if (key == '\t') {
-    zones[selected].selected = false;
+    grids[selected].selected = false;
     selected++;
-    if (selected >= zones.length) selected = 0;
-    zones[selected].selected = true;
+    if (selected >= grids.length) selected = 0;
+    grids[selected].selected = true;
   }
   saveData();
 }
@@ -120,15 +118,15 @@ void keyReleased()
 
 void saveData()
 {
-  String[] lines = new String[zones.length];
-  for (int i=0; i<zones.length; i++) {
-    lines[i] = zones[i].id + " " + zones[i].loc.x + " " + zones[i].loc.y + " " + zones[i].loc.z + " " + zones[i].size;
+  String[] lines = new String[grids.length];
+  for (int i=0; i<grids.length; i++) {
+    lines[i] = grids[i].id + " " + grids[i].size + " " + grids[i].zones.length + " " + grids[i].zones[0].length + " " + grids[i].centrePoint.x + " " + grids[i].centrePoint.y + " " + grids[i].centrePoint.z;
   }
   saveStrings("data.txt", lines);
 }
 
 void learnEverything()
 {
-  for (int i=0; i<zones.length; i++) zones[i].learnToIgnoreCurrentPixels();
+  for (int i=0; i<grids.length; i++) grids[i].learnToIgnoreCurrentPixels();
   baselinePixelCount = currentPixelCount;
 }
