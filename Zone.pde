@@ -37,7 +37,6 @@ class Zone
     if (coolOffCounter > 0) coolOffCounter--;
     if (learningCounter > 0) learningCounter--;
     int c;
-    pushMatrix();
     if (triggerCount > 2) {
       if (coolOffCounter == 0) {
         sendZoneData(id, triggerCount);
@@ -53,7 +52,7 @@ class Zone
     triggerCount = 0;
     translate(loc.x, loc.y, loc.z);
     sphere(size);
-    popMatrix();
+    translate(-loc.x, -loc.y, -loc.z);
   }
 
   void learnToIgnoreCurrentPixels()
