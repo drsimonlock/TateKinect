@@ -3,7 +3,7 @@ Grid[] grids;
 int xoffset, yoffset, zoffset;
 int selected = 0;
 int increment = 10;
-int skip = 2;
+int skip = 3;
 KinectAbstractionLayer kinect;
 int baselinePixelCount;
 int currentPixelCount;
@@ -11,6 +11,8 @@ boolean topDown = false;
 boolean walkForwards = false;
 boolean walkBackwards = false;
 int coolOffCountdown;
+int cycleDirection = 1;
+boolean analysePointcloud = true;
 
 void setup()
 {
@@ -25,31 +27,35 @@ void setup()
 
 void draw()
 {
-  if(keyPressed) checkKeysPressed();
+  if (keyPressed) checkKeysPressed();
   if (coolOffCountdown > 0) coolOffCountdown--;
   background(0);
-  int[] depth = kinect.getRawDepth();
   pushMatrix();
   translate(xoffset, yoffset, zoffset);
   if (topDown) kinect.topDownTranslate();
   rotateY(pov);
   if (walkForwards) zoffset+=3;
   if (walkBackwards) zoffset-=3;
-  currentPixelCount = 0;
-  for (int x=0; x<kinect.w; x+=skip) {
-    for (int y=0; y<kinect.h; y+=skip) {
-      int rawDepth = depth[x+y*kinect.w];
-      if (rawDepth != 0) {
-        PVector position = kinect.calculateRealWorldPoint(x, y, rawDepth);
-        if (position.z > 0) currentPixelCount++;
-        translate(position.x, position.y, position.z);
-        stroke(position.z/2.8, 255, 255);
-        point(0, 0);
-        translate(-position.x, -position.y, -position.z);
-        for (int i=0; i<grids.length; i++) grids[i].checkForTrigger(position);
+  if (analysePointcloud) {
+    int[] depth = kinect.getRawDepth();
+    currentPixelCount = 0;
+    strokeWeight(2);
+    for (int x=0; x<kinect.w; x+=skip) {
+      for (int y=0; y<kinect.h; y+=skip) {
+        int rawDepth = depth[x+y*kinect.w];
+        if (rawDepth != 0) {
+          PVector position = kinect.calculateRealWorldPoint(x, y, rawDepth);
+          if (position.z > 0) currentPixelCount++;
+          translate(position.x, position.y, position.z);
+          stroke(position.z/2.8, 255, 255);
+          point(0, 0);
+          translate(-position.x, -position.y, -position.z);
+          for (int i=0; i<grids.length; i++) grids[i].checkForTrigger(position);
+        }
       }
     }
   }
+  strokeWeight(1);
   for (int i=0; i<grids.length; i++) grids[i].drawYourself();
   if (frameCount % 50 == 0) sendSceneData((baselinePixelCount - currentPixelCount)/10);
   popMatrix();
@@ -69,16 +75,21 @@ void mouseDragged()
 
 void keyPressed()
 {
+  if (keyCode == SHIFT) {
+    increment = 1;
+    cycleDirection = -cycleDirection;
+  }
   checkKeysPressed();
-  coolOffCountdown = 10;
+  if(analysePointcloud) coolOffCountdown = 10;
 }
 
 void checkKeysPressed()
 {
   if (coolOffCountdown == 0) {
-    coolOffCountdown = 5;
+    if(analysePointcloud) coolOffCountdown = 5;
     if (key == 'l') learnEverything();
     else if (key == 't') topDown = !topDown;
+    else if (key == 'p') analysePointcloud = !analysePointcloud;
     else if (key == 'x') grids[selected].rotX(-0.025);
     else if (key == 'X') grids[selected].rotX(0.025);
     else if (key == 'y') grids[selected].rotY(-0.025);
@@ -88,7 +99,6 @@ void checkKeysPressed()
     else if (key == 'q') walkForwards = true;
     else if (key == 'a') walkBackwards = true;
     else if (key == 'r') resetView();
-    else if (keyCode == SHIFT) increment = 1;
     else if (keyCode == UP) {
       if (topDown) grids[selected].shiftZ(increment);
       else grids[selected].shiftY(-increment);
@@ -105,8 +115,9 @@ void checkKeysPressed()
       else grids[selected].shiftZ(increment);
     } else if (key == '\t') {
       grids[selected].selected = false;
-      selected++;
+      selected+=cycleDirection;
       if (selected >= grids.length) selected = 0;
+      if (selected < 0) selected = grids.length-1;
       grids[selected].selected = true;
     }
     saveData();
@@ -123,8 +134,10 @@ void resetView()
 
 void keyReleased()
 {
-  if (keyCode == SHIFT) increment = 10;
-  else if (key == 'q') walkForwards = false;
+  if (keyCode == SHIFT) {
+    increment = 10;
+    cycleDirection = -cycleDirection;
+  } else if (key == 'q') walkForwards = false;
   else if (key == 'a') walkBackwards = false;
 }
 
@@ -144,7 +157,7 @@ void saveData()
 {
   String[] lines = new String[grids.length];
   for (int i=0; i<grids.length; i++) {
-    lines[i] = grids[i].id + " " + grids[i].size + " " + grids[i].zones[0].length + " " + grids[i].zones.length + " " +
+    lines[i] = grids[i].id + " " + grids[i].size + " " + grids[i].zones.length + " " + grids[i].zones[0].length + " " +
       grids[i].centrePoint.x + " " + grids[i].centrePoint.y + " " + grids[i].centrePoint.z + " " +
       grids[i].rotationX + " " + grids[i].rotationY + " " + grids[i].rotationZ;
   }

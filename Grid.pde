@@ -18,11 +18,11 @@ class Grid
     rotationX = rotX;
     rotationY = rotY;
     rotationZ = rotZ;
-    zones = new Zone[numRows][numCols];
-    for(int row=0; row<zones.length ;row++) {
-      for(int col=0; col<zones[row].length ;col++) {
+    zones = new Zone[numCols][numRows];
+    for(int row=0; row<zones[0].length ;row++) {
+      for(int col=0; col<zones.length ;col++) {
         // Create zone with inital position (will change after doLayout)
-        zones[row][col] = new Zone(ident, x, y, z, size);
+        zones[col][row] = new Zone(ident + "/" + col + "/" + row, x, y, z, size);
       }
     }
     doLayout();
@@ -33,9 +33,9 @@ class Grid
     translate(centrePoint.x,centrePoint.y,centrePoint.z);
     if(selected) drawBoundingBox();
     sphereDetail(2+(size/7));
-    for(int row=0; row<zones.length ;row++) {
-      for(int col=0; col<zones[row].length ;col++) {
-        zones[row][col].drawYourself();
+    for(int row=0; row<zones[0].length ;row++) {
+      for(int col=0; col<zones.length ;col++) {
+        zones[col][row].drawYourself();
       }
     }
     translate(-centrePoint.x,-centrePoint.y,-centrePoint.z);
@@ -49,11 +49,11 @@ class Grid
     fill(100,255,255);
     textAlign(CENTER);
     textSize(18);
-    text("TOP",0,-spacing*zones.length/2 - 10);
+    text("TOP",0,-spacing*zones[0].length/2 - 5);
     noFill();
     stroke(100,255,255);
-    strokeWeight(4);
-    box(spacing*zones[0].length,spacing*zones.length,size*2);
+    strokeWeight(3);
+    box(spacing*zones.length,spacing*zones[0].length,size*2);
     strokeWeight(1);
     rotateZ(-rotationZ);
     rotateY(-rotationY);
@@ -63,9 +63,9 @@ class Grid
   void checkForTrigger(PVector point)
   {
     PVector localPoint = new PVector(point.x-centrePoint.x,point.y-centrePoint.y,point.z-centrePoint.z);
-    for(int row=0; row<zones.length ;row++) {
-      for(int col=0; col<zones[row].length ;col++) {
-        if(zones[row][col].contains(localPoint)) zones[row][col].triggerCount++;
+    for(int row=0; row<zones[0].length ;row++) {
+      for(int col=0; col<zones.length ;col++) {
+        if(zones[col][row].contains(localPoint)) zones[col][row].triggerCount++;
       }
     }
   }
@@ -112,13 +112,13 @@ class Grid
     rotateX(rotationX);
     rotateY(rotationY);
     rotateZ(rotationZ);
-    for(int row=0; row<zones.length ;row++) {
-      for(int col=0; col<zones[row].length ;col++) {
-        int xpos = int(col * spacing) - int(spacing*float(zones[row].length-1)/2.0);
-        int ypos = int(row * spacing) - int(spacing*float(zones.length-1)/2.0);
-        zones[row][col].loc.x = modelX(xpos,ypos,0);
-        zones[row][col].loc.y = modelY(xpos,ypos,0);
-        zones[row][col].loc.z = modelZ(xpos,ypos,0);
+    for(int row=0; row<zones[0].length ;row++) {
+      for(int col=0; col<zones.length ;col++) {
+        int xpos = int(col * spacing) - int(spacing*float(zones.length-1)/2.0);
+        int ypos = int(row * spacing) - int(spacing*float(zones[0].length-1)/2.0);
+        zones[col][row].loc.x = modelX(xpos,ypos,0);
+        zones[col][row].loc.y = modelY(xpos,ypos,0);
+        zones[col][row].loc.z = modelZ(xpos,ypos,0);
       }
     }
     popMatrix();
@@ -126,9 +126,9 @@ class Grid
   
   void learnToIgnoreCurrentPixels()
   {
-    for(int row=0; row<zones.length ;row++) {
-      for(int col=0; col<zones[row].length ;col++) {
-        zones[row][col].learnToIgnoreCurrentPixels();
+    for(int row=0; row<zones[0].length ;row++) {
+      for(int col=0; col<zones.length ;col++) {
+        zones[col][row].learnToIgnoreCurrentPixels();
       }
     }
   }
