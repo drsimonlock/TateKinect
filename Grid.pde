@@ -7,11 +7,13 @@ class Grid
   Zone[][] zones;
   boolean selected = false;
   float rotationX, rotationY, rotationZ;
+  float spacing;
   
-  Grid(String ident, int s, int numRows, int numCols, int x, int y, int z, float rotX, float rotY, float rotZ)
+  Grid(String ident, int s, int numCols, int numRows, int x, int y, int z, float rotX, float rotY, float rotZ)
   {
     id = ident;
     size = s;
+    spacing = (size * 2.0) * 0.8;
     centrePoint = new PVector(x,y,z);
     rotationX = rotX;
     rotationY = rotY;
@@ -28,15 +30,34 @@ class Grid
   
   void drawYourself()
   {
-    translate(centrePoint.x,centrePoint.y,centrePoint.z);    
-    if (selected) strokeWeight(3);
-    else strokeWeight(1);
+    translate(centrePoint.x,centrePoint.y,centrePoint.z);
+    if(selected) drawBoundingBox();
+    sphereDetail(2+(size/7));
     for(int row=0; row<zones.length ;row++) {
       for(int col=0; col<zones[row].length ;col++) {
         zones[row][col].drawYourself();
       }
     }
     translate(-centrePoint.x,-centrePoint.y,-centrePoint.z);
+  }
+
+  void drawBoundingBox()
+  {
+    rotateX(rotationX);
+    rotateY(rotationY);
+    rotateZ(rotationZ);
+    fill(100,255,255);
+    textAlign(CENTER);
+    textSize(18);
+    text("TOP",0,-spacing*zones.length/2 - 10);
+    noFill();
+    stroke(100,255,255);
+    strokeWeight(4);
+    box(spacing*zones[0].length,spacing*zones.length,size*2);
+    strokeWeight(1);
+    rotateZ(-rotationZ);
+    rotateY(-rotationY);
+    rotateX(-rotationX);
   }
 
   void checkForTrigger(PVector point)
@@ -91,7 +112,6 @@ class Grid
     rotateX(rotationX);
     rotateY(rotationY);
     rotateZ(rotationZ);
-    float spacing = (size * 2.0) * 0.8;
     for(int row=0; row<zones.length ;row++) {
       for(int col=0; col<zones[row].length ;col++) {
         int xpos = int(col * spacing) - int(spacing*float(zones[row].length-1)/2.0);
