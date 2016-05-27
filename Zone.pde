@@ -1,6 +1,8 @@
 class Zone
 {
   PVector loc;
+  int col;
+  int row;
   int triggerCount;
   int size;
   String id;
@@ -8,9 +10,11 @@ class Zone
   int learningCounter = 20;
   int coolOffCounter;
 
-  public Zone(String ident, int xpos, int ypos, int zpos, int s)
+  public Zone(String ident, int c, int r, int xpos, int ypos, int zpos, int s)
   {
     id = ident;
+    col = c;
+    row = r;
     loc = new PVector(xpos, ypos, zpos);
     size = s;
   }
@@ -39,7 +43,7 @@ class Zone
     int c;
     if (triggerCount > 2) {
       if (coolOffCounter == 0) {
-        sendZoneData(id, triggerCount);
+        sendZoneData(id, col, row, triggerCount);
         coolOffCounter = 20;
       }
       c = color(0, 255, 255);

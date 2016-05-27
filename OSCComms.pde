@@ -13,9 +13,12 @@ void initOSC()
   recipient = new NetAddress("127.0.0.1", 8888);
 }
 
-void sendZoneData(String id, int count)
+void sendZoneData(String screenID, int col, int row, int count)
 {
-  OscMessage message = new OscMessage("/" + machineID + "/zone/" + id);
+  OscMessage message = new OscMessage("/tiwwa/zone/");
+  message.add(machineID + "." + screenID);
+  message.add(col);
+  message.add(row);
   message.add(count);
   osc.send(message, recipient);
 }
@@ -41,16 +44,16 @@ String getMachineID()
     for (int i=0; i<bytes.length; i++) mac = mac + String.format("%02X:", bytes[i]);
     mac = mac.substring(0, mac.length()-1);
     mac = mac.toLowerCase();    
-    if (mac.endsWith("34:36:3b:78:19:5c")) return "S";
-    else if (mac.endsWith("52:5a:2e:22:59:08")) return "A";
-    else if (mac.endsWith("BBB")) return "B";
-    else if (mac.endsWith("CCC")) return "C";
+    if (mac.endsWith("34:36:3b:78:19:5c")) return "s";
+    else if (mac.endsWith("52:5a:2e:22:59:08")) return "a";
+    else if (mac.endsWith("BBB")) return "b";
+    else if (mac.endsWith("CCC")) return "c";
     else {
       println(mac + " is an unknown machine");
-      return "X";
+      return "x";
     }
   } 
   catch (SocketException se) {
-    return "X";
+    return "x";
   }
 }

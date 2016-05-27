@@ -22,7 +22,7 @@ class Grid
     for(int row=0; row<zones[0].length ;row++) {
       for(int col=0; col<zones.length ;col++) {
         // Create zone with inital position (will change after doLayout)
-        zones[col][row] = new Zone(ident + "/" + col + "/" + row, x, y, z, size);
+        zones[col][row] = new Zone(ident, col, row, x, y, z, size);
       }
     }
     doLayout();

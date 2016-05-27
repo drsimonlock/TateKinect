@@ -8,9 +8,6 @@ KinectAbstractionLayer kinect;
 int baselinePixelCount;
 int currentPixelCount;
 boolean topDown = false;
-boolean walkForwards = false;
-boolean walkBackwards = false;
-int coolOffCountdown;
 int cycleDirection = 1;
 boolean analysePointcloud = true;
 
@@ -27,15 +24,12 @@ void setup()
 
 void draw()
 {
-  if (keyPressed) checkKeysPressed();
-  if (coolOffCountdown > 0) coolOffCountdown--;
+  if (keyPressed) processNavigationKeys();
   background(0);
   pushMatrix();
   translate(xoffset, yoffset, zoffset);
   if (topDown) kinect.topDownTranslate();
   rotateY(pov);
-  if (walkForwards) zoffset+=3;
-  if (walkBackwards) zoffset-=3;
   if (analysePointcloud) {
     int[] depth = kinect.getRawDepth();
     currentPixelCount = 0;
@@ -79,49 +73,47 @@ void keyPressed()
     increment = 1;
     cycleDirection = -cycleDirection;
   }
-  checkKeysPressed();
-  if(analysePointcloud) coolOffCountdown = 10;
+  else if (key == 'l') learnEverything();
+  else if (key == 't') topDown = !topDown;
+  else if (key == 'p') analysePointcloud = !analysePointcloud;
+  else if (key == 'r') resetView();
+  else if (key == '\t') {
+    grids[selected].selected = false;
+    selected+=cycleDirection;
+    if (selected >= grids.length) selected = 0;
+    if (selected < 0) selected = grids.length-1;
+    grids[selected].selected = true;
+  }
 }
 
-void checkKeysPressed()
+void processNavigationKeys()
 {
-  if (coolOffCountdown == 0) {
-    if(analysePointcloud) coolOffCountdown = 5;
-    if (key == 'l') learnEverything();
-    else if (key == 't') topDown = !topDown;
-    else if (key == 'p') analysePointcloud = !analysePointcloud;
-    else if (key == 'x') grids[selected].rotX(-0.025);
-    else if (key == 'X') grids[selected].rotX(0.025);
-    else if (key == 'y') grids[selected].rotY(-0.025);
-    else if (key == 'Y') grids[selected].rotY(0.025);
-    else if (key == 'z') grids[selected].rotZ(-0.025);
-    else if (key == 'Z') grids[selected].rotZ(0.025);
-    else if (key == 'q') walkForwards = true;
-    else if (key == 'a') walkBackwards = true;
-    else if (key == 'r') resetView();
-    else if (keyCode == UP) {
-      if (topDown) grids[selected].shiftZ(increment);
-      else grids[selected].shiftY(-increment);
-    } else if (keyCode == DOWN) {
-      if (topDown) grids[selected].shiftZ(-increment);
-      else  grids[selected].shiftY(increment);
-    } else if (keyCode == LEFT) grids[selected].shiftX(increment);
-    else if (keyCode == RIGHT) grids[selected].shiftX(-increment);
-    else if ((key == '-') || (key == '_')) {
-      if (topDown) grids[selected].shiftY(-increment);
-      else grids[selected].shiftZ(-increment);
-    } else if ((key == '=') || (key == '+')) {
-      if (topDown) grids[selected].shiftY(increment);
-      else grids[selected].shiftZ(increment);
-    } else if (key == '\t') {
-      grids[selected].selected = false;
-      selected+=cycleDirection;
-      if (selected >= grids.length) selected = 0;
-      if (selected < 0) selected = grids.length-1;
-      grids[selected].selected = true;
-    }
-    saveData();
+  if (key == 'x') grids[selected].rotX(-0.01);
+  else if (key == 'X') grids[selected].rotX(0.01);
+  else if (key == 'y') grids[selected].rotY(-0.01);
+  else if (key == 'Y') grids[selected].rotY(0.01);
+  else if (key == 'z') grids[selected].rotZ(-0.01);
+  else if (key == 'Z') grids[selected].rotZ(0.01);
+  else if (key == '2') zoffset+=5;
+  else if (key == '1') zoffset-=5;
+  else if (keyCode == UP) {
+    if (topDown) grids[selected].shiftZ(increment);
+    else grids[selected].shiftY(-increment);
+  } else if (keyCode == DOWN) {
+    if (topDown) grids[selected].shiftZ(-increment);
+    else  grids[selected].shiftY(increment);
+  } else if (keyCode == LEFT) grids[selected].shiftX(increment);
+  else if (keyCode == RIGHT) grids[selected].shiftX(-increment);
+  else if ((key == '-') || (key == '_')) {
+    if (topDown) grids[selected].shiftY(-increment);
+    else grids[selected].shiftZ(-increment);
+  } else if ((key == '=') || (key == '+')) {
+    if (topDown) grids[selected].shiftY(increment);
+    else grids[selected].shiftZ(increment);
   }
+  saveData();
+  // Slow things down if we don't have a point cloud to analyse
+  if( ! analysePointcloud) delay(50);
 }
 
 void resetView()
@@ -137,8 +129,7 @@ void keyReleased()
   if (keyCode == SHIFT) {
     increment = 10;
     cycleDirection = -cycleDirection;
-  } else if (key == 'q') walkForwards = false;
-  else if (key == 'a') walkBackwards = false;
+  }
 }
 
 void loadData()
