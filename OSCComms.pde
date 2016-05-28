@@ -25,14 +25,15 @@ void sendZoneData(String screenID, int col, int row, int count)
 
 void sendSceneData(int count)
 {
-  OscMessage message = new OscMessage("/" + machineID + "/scene");
+  OscMessage message = new OscMessage("/tiwwa/scene/");
+  message.add(machineID);
   message.add(count);
   osc.send(message, recipient);
 }
 
 void oscEvent(OscMessage message)
 {
-  if(message.addrPattern().endsWith("learn")) learnEverything();
+  if(message.addrPattern().indexOf("learn") != -1) learnEverything();
 }
 
 String getMachineID()

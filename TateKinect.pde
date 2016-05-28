@@ -2,7 +2,7 @@ float pov = PI;
 Grid[] grids;
 int xoffset, yoffset, zoffset;
 int selected = 0;
-int increment = 10;
+int increment = 5;
 int skip = 3;
 KinectAbstractionLayer kinect;
 int baselinePixelCount;
@@ -94,8 +94,8 @@ void processNavigationKeys()
   else if (key == 'Y') grids[selected].rotY(0.01);
   else if (key == 'z') grids[selected].rotZ(-0.01);
   else if (key == 'Z') grids[selected].rotZ(0.01);
-  else if (key == '2') zoffset+=5;
-  else if (key == '1') zoffset-=5;
+  else if (key == 'q') zoffset+=5;
+  else if (key == 'a') zoffset-=5;
   else if (keyCode == UP) {
     if (topDown) grids[selected].shiftZ(increment);
     else grids[selected].shiftY(-increment);
@@ -127,7 +127,7 @@ void resetView()
 void keyReleased()
 {
   if (keyCode == SHIFT) {
-    increment = 10;
+    increment = 5;
     cycleDirection = -cycleDirection;
   }
 }
