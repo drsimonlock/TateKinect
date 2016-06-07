@@ -49,7 +49,7 @@ class Grid
     fill(100,255,255);
     textAlign(CENTER);
     textSize(18);
-    text("TOP",0,-spacing*zones[0].length/2 - 5);
+    text(id,0,-spacing*zones[0].length/2 - 5);
     noFill();
     stroke(100,255,255);
     strokeWeight(3);

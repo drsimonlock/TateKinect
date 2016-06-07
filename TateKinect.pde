@@ -1,9 +1,10 @@
+String machineID;
 float pov = PI;
 Grid[] grids;
 int xoffset, yoffset, zoffset;
 int selected = 0;
 int increment = 5;
-int skip = 3;
+int skip = 2;
 KinectAbstractionLayer kinect;
 int baselinePixelCount;
 int currentPixelCount;
@@ -135,10 +136,12 @@ void keyReleased()
 void loadData()
 {
   String[] lines = loadStrings("data.txt");
-  grids = new Grid[lines.length];
-  for (int i=0; i<lines.length; i++) {
+  machineID = lines[0];
+  grids = new Grid[lines.length-1];
+  // First line is the machine ID, so skip it
+  for (int i=1; i<lines.length; i++) {
     String[] data = lines[i].split(" ");
-    grids[i] = new Grid(data[0], int(data[1]), int(data[2]), int(data[3]), 
+    grids[i-1] = new Grid(data[0], int(data[1]), int(data[2]), int(data[3]), 
       int(data[4]), int(data[5]), int(data[6]), 
       float(data[7]), float(data[8]), float(data[9]));
   }
@@ -146,9 +149,10 @@ void loadData()
 
 void saveData()
 {
-  String[] lines = new String[grids.length];
+  String[] lines = new String[grids.length+1];
+  lines[0] = machineID;
   for (int i=0; i<grids.length; i++) {
-    lines[i] = grids[i].id + " " + grids[i].size + " " + grids[i].zones.length + " " + grids[i].zones[0].length + " " +
+    lines[i+1] = grids[i].id + " " + grids[i].size + " " + grids[i].zones.length + " " + grids[i].zones[0].length + " " +
       grids[i].centrePoint.x + " " + grids[i].centrePoint.y + " " + grids[i].centrePoint.z + " " +
       grids[i].rotationX + " " + grids[i].rotationY + " " + grids[i].rotationZ;
   }
