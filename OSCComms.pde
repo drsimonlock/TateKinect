@@ -8,7 +8,7 @@ NetAddress recipient;
 void initOSC()
 {
   osc = new OscP5(this, 8000);
-  recipient = new NetAddress("127.0.0.1", 8888);  
+  recipient = new NetAddress("motherbrain.local", 12000);  
 }
 
 void sendZoneData(String gridID, int col, int row, int count)

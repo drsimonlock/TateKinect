@@ -4,7 +4,7 @@ Grid[] grids;
 int xoffset, yoffset, zoffset;
 int selected = 0;
 int increment = 5;
-int skip = 2;
+int skip = 3;
 KinectAbstractionLayer kinect;
 int baselinePixelCount;
 int currentPixelCount;

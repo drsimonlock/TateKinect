@@ -41,7 +41,7 @@ class Zone
     if (coolOffCounter > 0) coolOffCounter--;
     if (learningCounter > 0) learningCounter--;
     int c;
-    if (triggerCount > 2) {
+    if (triggerCount > size/3) {
       if (coolOffCounter == 0) {
         sendZoneData(id, col, row, triggerCount);
         coolOffCounter = 20;

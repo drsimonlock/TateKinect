@@ -32,7 +32,8 @@ class Grid
   {
     translate(centrePoint.x,centrePoint.y,centrePoint.z);
     if(selected) drawBoundingBox();
-    sphereDetail(2+(size/7));
+    if(size < 30) sphereDetail(2+(size/7));
+    else sphereDetail(12);
     for(int row=0; row<zones[0].length ;row++) {
       for(int col=0; col<zones.length ;col++) {
         zones[col][row].drawYourself();
